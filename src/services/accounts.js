@@ -11,16 +11,15 @@ const getAccountSql = `
 export class AccountsService {
   getAccount = async (accountNumber) => {
     const account = await this.execute(getAccountSql, [accountNumber]);
-    return account[0]
-      ? {
-          userId: account[0]?.user_id,
-          externalId: account[0]?.external_id,
-          currency: {
-            id: account[0]?.currency_id,
-            iso: account[0]?.currency_iso,
-          },
-        }
-      : undefined;
+    if (!account[0]) throw new Error(`Account ${accountNumber} not found`);
+    return {
+      userId: account[0]?.user_id,
+      externalId: account[0]?.external_id,
+      currency: {
+        id: account[0]?.currency_id,
+        iso: account[0]?.currency_iso,
+      },
+    };
   };
 
   async execute(query, params) {

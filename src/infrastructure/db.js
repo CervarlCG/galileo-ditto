@@ -6,7 +6,7 @@ export let client = undefined;
 export async function initializeDB() {
   client = new Client({
     connectionString: config.env.DATABASE_URL,
-    ssl: { rejectUnauthorized: false },
+    ssl: false,
   });
   await client.connect();
 }

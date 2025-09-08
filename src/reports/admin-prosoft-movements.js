@@ -3,7 +3,7 @@ import { TransactionRecordsService } from "../services/transaction-records.js";
 import { formatMoney } from "../utils/money.js";
 import ora from "ora";
 
-export class AdminMovementsReport {
+export class AdminProsoftMovementsReport {
   constructor(account, movements) {
     this.movementsService = new AdminMovementsService(movements);
     this.transactionRecordsService = new TransactionRecordsService(account);

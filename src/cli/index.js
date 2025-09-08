@@ -1,6 +1,6 @@
 #!/usr/bin/env node
 import { program } from "commander";
-import { generateReport } from "./generate-report.js";
+import { generateReport } from "./actions/report/index.js";
 import ora from "ora";
 import { initializeDB, closeDB } from "../infrastructure/db.js";
 import { loadConfig } from "../infrastructure/config.js";
@@ -22,8 +22,12 @@ program
   });
 
 program
-  .command("generate:report")
-  .arguments("<accountNumber>", "The account number to generate the report for")
+  .command("report")
+  .argument(
+    "<type>",
+    "The type of report to generate (e.g., movements, admin-movements)"
+  )
+  .argument("<accountNumber>", "The account number to generate the report for")
   .description("Generate a report of transactions")
   .option(
     "-u, --user <user>",
