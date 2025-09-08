@@ -11,13 +11,20 @@ export class AdminMovementsReport {
 
   getFeeCredits = async () => {
     const spinner = ora("Retrieving fee earnings...").start();
+    const records = await this.transactionRecordsService.getCredits();
     const feeMovements = await this.movementsService.getFeeCredits();
     const total = feeMovements.reduce((acc, m) => acc + m.Monto, 0);
+    const notFound = this.getMovementsNotFound(feeMovements, records);
     spinner.succeed();
     return {
       total,
+      notFound,
       totalStyled: formatMoney(total, this.currency),
       count: feeMovements.length,
+      details: feeMovements.map((m) => ({
+        ...m,
+        Monto: formatMoney(m.Monto, this.currency),
+      })),
     };
   };
 
@@ -91,6 +98,7 @@ export class AdminMovementsReport {
         fee: {
           total: fee.totalStyled,
           count: fee.count,
+          notFound: fee.notFound.length,
         },
         credits: {
           total: credits.totalStyled,
