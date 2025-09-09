@@ -1,27 +1,31 @@
 import { getCCFClient } from "../../infrastructure/prosoft.js";
 
 export class ProsoftMovements {
-  async list(ccfAccount, page = 1) {
+  async list(ccfAccount, { page, startDate, endDate } = {}) {
     const client = getCCFClient();
     const response = await client.post("/ObtenerMovimientos", {
       NumCuentaCCF: ccfAccount,
       Pagina: page,
-      FechaInicial: "2025-07-01T20:39:56.155Z",
-      FechaFinal: "2025-09-30T20:39:56.155Z",
+      FechaInicial: startDate || undefined,
+      FechaFinal: endDate || undefined,
     });
 
     return response.data;
   }
 
-  async listAll(ccfAccount) {
+  async listAll(ccfAccount, { startDate, endDate } = {}) {
     let allMovements = [];
     let page = 1;
     let response = undefined;
     do {
-      response = await this.list(ccfAccount, page);
+      response = await this.list(ccfAccount, {
+        page,
+        startDate,
+        endDate,
+      }).catch(() => ({ Movimientos: [] }));
       allMovements = allMovements.concat(response.Movimientos);
       page++;
-    } while (response.Resultado && response.Movimientos.length);
+    } while (response.Movimientos.length);
     return allMovements;
   }
 }

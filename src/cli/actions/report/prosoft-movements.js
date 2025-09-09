@@ -6,6 +6,7 @@ import { CSVExporter } from "../../../exporters/csv.js";
 import { AccountsService } from "../../../services/accounts.js";
 import { ProsoftMovements } from "../../../lib/prosoft/movements.js";
 import { task } from "../../../utils/program.js";
+import { BaseReportAction } from "./base.js";
 
 const reportStrategies = {
   user: UserProsoftMovementsReport,
@@ -26,6 +27,7 @@ export async function generateProsoftMovementsReport(accountNumber, opts) {
   const movementsFetcher = new ProsoftMovements();
   const ReporterClass = reportStrategies[opts.user];
   const ExporterClass = exporterStrategies[opts.format];
+  const baseReporter = new BaseReportAction();
 
   if (!ReporterClass) program.error(`Unknown user type: ${opts.user}`);
   if (!ExporterClass) program.error(`Unknown format type: ${opts.format}`);
@@ -38,47 +40,23 @@ export async function generateProsoftMovementsReport(accountNumber, opts) {
 
   const movements = await task(
     `Fetching movements for account ${accountNumber}...`,
-    () => movementsFetcher.listAll(account.externalId),
+    () =>
+      movementsFetcher.listAll(account.externalId, {
+        startDate: opts.startDate.subtract(6, "hours").toISOString(),
+        endDate: opts.endDate.subtract(6, "hours").toISOString(),
+      }),
     () => process.exit(1)
   );
 
-  const reporter = new ReporterClass(account, movements);
+  const reporter = new ReporterClass(account, movements, opts);
   const exporter = new ExporterClass();
 
   const { summary, data } = await reporter.run();
-  await exportReport(data, exporter, accountNumber, opts.output);
-
-  console.log("Report Summary:");
-  console.table(summary);
-}
-
-/**
- * Export report data using the specified exporter.
- * @param {Object} data
- * @param {Object} exporter
- * @param {string} accountNumber
- * @param {string} outDir
- */
-async function exportReport(data, exporter, accountNumber, outDir) {
-  const spinner = ora(`Exporting reports...`).start();
-  for (const [key, value] of Object.entries(data)) {
-    if (!value.details) continue;
-
-    const filename = `report_${accountNumber}_${key}`;
-
-    await exporter.export({
-      data: value.details,
-      filename,
-      outDir,
-    });
-
-    if (value.notFound)
-      await exporter.export({
-        data: value.notFound,
-        filename: `${filename}_not_found`,
-        outDir,
-      });
-  }
-
-  spinner.succeed();
+  await baseReporter.export(
+    summary,
+    data,
+    exporter,
+    accountNumber,
+    opts.output
+  );
 }

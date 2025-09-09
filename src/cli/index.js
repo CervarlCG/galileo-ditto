@@ -44,6 +44,14 @@ program
     "Format of the report (e.g., csv, json, console)",
     "csv"
   )
+  .option(
+    "-s, --start-date <date>",
+    "Start date for the report on ISO 8601 format (e.g., 2023-01-01)"
+  )
+  .option(
+    "-e, --end-date <date>",
+    "End date for the report on ISO 8601 format (e.g., 2023-01-31)"
+  )
   .action(generateReport);
 
 program.parse();

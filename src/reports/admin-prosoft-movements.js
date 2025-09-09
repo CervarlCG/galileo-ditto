@@ -4,9 +4,17 @@ import { formatMoney } from "../utils/money.js";
 import ora from "ora";
 
 export class AdminProsoftMovementsReport {
-  constructor(account, movements) {
+  constructor(account, movements, opts) {
+    this.opts = {
+      ...opts,
+      startDate: opts.startDate.add(1, "hour"),
+      endDate: opts.endDate.subtract(1, "hour"),
+    };
     this.movementsService = new AdminMovementsService(movements);
-    this.transactionRecordsService = new TransactionRecordsService(account);
+    this.transactionRecordsService = new TransactionRecordsService(
+      account,
+      this.opts
+    );
   }
 
   getFeeCredits = async () => {

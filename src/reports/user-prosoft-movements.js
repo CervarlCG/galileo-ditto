@@ -5,9 +5,17 @@ import { formatMoney } from "../utils/money.js";
 import ora from "ora";
 
 export class UserProsoftMovementsReport {
-  constructor(account, movements) {
+  constructor(account, movements, opts) {
+    this.opts = {
+      ...opts,
+      startDate: opts.startDate.add(1, "hour"),
+      endDate: opts.endDate.subtract(1, "hour"),
+    };
     this.movementsService = new MovementsService(movements);
-    this.transactionRecordsService = new TransactionRecordsService(account);
+    this.transactionRecordsService = new TransactionRecordsService(
+      account,
+      this.opts
+    );
     this.movementsFetcher = new ProsoftMovements();
   }
 
