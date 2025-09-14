@@ -87,11 +87,13 @@ export class UserProsoftMovementsReport {
       summary: {
         credits: {
           total: credits.totalStyled,
+          totalRaw: credits.total,
           count: credits.count,
           notFound: credits.notFound.length,
         },
         debits: {
           total: debits.totalStyled,
+          totalRaw: debits.total,
           count: debits.count,
           notFound: debits.notFound.length,
         },

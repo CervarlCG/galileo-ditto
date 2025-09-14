@@ -1,11 +1,7 @@
-import ora from "ora";
 import { program } from "commander";
 import { UserProsoftMovementsReport } from "../../../reports/user-prosoft-movements.js";
 import { AdminProsoftMovementsReport } from "../../../reports/admin-prosoft-movements.js";
 import { CSVExporter } from "../../../exporters/csv.js";
-import { AccountsService } from "../../../services/accounts.js";
-import { ProsoftMovements } from "../../../lib/prosoft/movements.js";
-import { task } from "../../../utils/program.js";
 import { BaseReportAction } from "./base.js";
 
 const reportStrategies = {
@@ -23,6 +19,37 @@ const exporterStrategies = {
  * @param {Object} opts The options for the report generation
  */
 export async function generateProsoftMovementsReport(accountNumber, opts) {
+  const baseReporter = new BaseReportAction();
+  const ExporterClass = exporterStrategies[opts.format];
+  const isGlobalReport = accountNumber === "all";
+  const reporterClass = reportStrategies[opts.user];
+  const isUserReport = opts.user === "user";
+
+  if (!ExporterClass) program.error(`Unknown format type: ${opts.format}`);
+  const { data, summary } = isGlobalReport
+    ? await baseReporter.reportForMultipleAccounts(
+        ["credits", "debits", ...(!isUserReport ? ["fee"] : [])],
+        reporterClass,
+        opts
+      )
+    : await baseReporter.reportForSingleAccount(
+        accountNumber,
+        reporterClass,
+        opts
+      );
+
+  const exporter = new ExporterClass();
+  await baseReporter.export(
+    summary,
+    data,
+    exporter,
+    isGlobalReport ? "all" : accountNumber,
+    opts.output
+  );
+  /*
+
+
+
   const accountsService = new AccountsService();
   const movementsFetcher = new ProsoftMovements();
   const ReporterClass = reportStrategies[opts.user];
@@ -58,5 +85,5 @@ export async function generateProsoftMovementsReport(accountNumber, opts) {
     exporter,
     accountNumber,
     opts.output
-  );
+  );*/
 }

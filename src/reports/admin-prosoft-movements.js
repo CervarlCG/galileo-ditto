@@ -105,16 +105,19 @@ export class AdminProsoftMovementsReport {
       summary: {
         fee: {
           total: fee.totalStyled,
+          totalRaw: fee.total,
           count: fee.count,
           notFound: fee.notFound.length,
         },
         credits: {
           total: credits.totalStyled,
+          totalRaw: credits.total,
           count: credits.count,
           notFound: credits.notFound.length,
         },
         debits: {
           total: debits.totalStyled,
+          totalRaw: debits.total,
           count: debits.count,
           notFound: debits.notFound.length,
         },
